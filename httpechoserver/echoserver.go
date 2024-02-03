@@ -12,24 +12,24 @@ import (
 )
 
 type PingMessage struct {
-	Payload    string `json:"payload"`
-	DelayNanos int64  `json:"delay_nanos"`
+	DelayNanos int64  `json:"delayNanos,omitempty"`
+	Payload    string `json:"payload,omitempty"`
 }
 
 type PongMessage struct {
 	Timestamp     string  `json:"timestamp"`
 	Hostname      string  `json:"hostname"`
 	Version       string  `json:"version"`
-	RemoteIp      string  `json:"remote_ip"`
-	RemotePort    int     `json:"remote_port"`
-	RequestId     string  `json:"request_id"`
-	RequestHost   string  `json:"request_host"`
-	RequestMethod string  `json:"request_method"`
-	RequestPath   string  `json:"request_path"`
-	RequestQuery  string  `json:"request_query"`
-	RequestTime   float64 `json:"request_time"`
-	UserAgent     string  `json:"user_agent"`
-	Payload       string  `json:"payload"`
+	RemoteIp      string  `json:"remoteIp"`
+	RemotePort    int     `json:"remotePort"`
+	RequestId     string  `json:"requestId"`
+	RequestHost   string  `json:"requestHost"`
+	RequestMethod string  `json:"requestMethod"`
+	RequestPath   string  `json:"requestPath"`
+	RequestQuery  string  `json:"requestQuery"`
+	RequestTime   float64 `json:"requestTime"`
+	UserAgent     string  `json:"userAgent"`
+	PingMessage
 }
 
 func ping(w http.ResponseWriter, r *http.Request) error {
@@ -68,7 +68,10 @@ func ping(w http.ResponseWriter, r *http.Request) error {
 		RequestQuery:  r.URL.RawQuery,
 		RequestTime:   time.Since(requestContext.StartTime).Seconds(),
 		UserAgent:     requestContext.UserAgent,
-		Payload:       ping.Payload,
+		PingMessage: PingMessage{
+			Payload:    ping.Payload,
+			DelayNanos: ping.DelayNanos,
+		},
 	}
 	return util.WriteJSON(w, pong)
 }

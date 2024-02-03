@@ -51,11 +51,12 @@ func ParseNetAddr(addr net.Addr) (ip string, port int) {
 }
 
 func WriteJSON(w http.ResponseWriter, data any) error {
-	resp, err := json.Marshal(data)
+	resp, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return err
 	}
 	w.Header().Set("Content-Type", "application/json")
+	resp = append(resp, byte('\n'))
 	_, err = w.Write(resp)
 	if err != nil {
 		return err

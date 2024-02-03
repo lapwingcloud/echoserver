@@ -41,6 +41,7 @@ func (s *echoServer) Ping(ctx context.Context, req *pb.PingMessage) (*pb.PongMes
 		RequestMethod: util.FirstValueFromMetadata(md, "request-method"),
 		RequestTime:   requestTime,
 		UserAgent:     util.FirstValueFromMetadata(md, "user-agent"),
-		Payload:       req.GetPayload(),
+		DelayNanos:    req.DelayNanos,
+		Payload:       req.Payload,
 	}, nil
 }
