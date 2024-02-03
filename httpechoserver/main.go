@@ -1,9 +1,14 @@
 package httpechoserver
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/lapwingcloud/echoserver/util"
 )
@@ -16,13 +21,35 @@ type StartOption struct {
 func Start(option StartOption) {
 	logger := util.NewLogger(option.LogFormat)
 
-	logger.Info(fmt.Sprintf("http server listening at %v", option.Bind))
-	err := http.ListenAndServe(option.Bind, &httpServer{
-		logger:   logger,
-		hostname: util.Hostname(),
-		version:  util.Version(),
-	})
-	if err != nil {
+	s := http.Server{
+		Addr: option.Bind,
+		Handler: &httpServer{
+			logger:   logger,
+			hostname: util.Hostname(),
+			version:  util.Version(),
+		},
+	}
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		sig := <-ch
+		logger.Info(fmt.Sprintf("got signal %v, shutting down http server", sig))
+		err := s.Shutdown(context.Background())
+		if err != nil {
+			logger.Error(fmt.Sprintf("failed to shutdown http server: %v", err))
+		}
+		wg.Done()
+	}()
+
+	logger.Info(fmt.Sprintf("http server listening at %v", s.Addr))
+	err := s.ListenAndServe()
+	if errors.Is(err, http.ErrServerClosed) {
+		wg.Wait()
+		logger.Info("http server has shut down")
+	} else {
 		logger.Error(fmt.Sprintf("failed to serve: %v", err))
 		os.Exit(1)
 	}

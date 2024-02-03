@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 
 	pb "github.com/lapwingcloud/echoserver/proto"
 	"github.com/lapwingcloud/echoserver/util"
@@ -31,11 +33,20 @@ func Start(option StartOption) {
 	}
 	s := grpc.NewServer(grpc.UnaryInterceptor(ui.Intercept))
 	pb.RegisterEchoServer(s, &echoServer{})
-	logger.Info(fmt.Sprintf("grpc server listening at %v", lis.Addr()))
 
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-ch
+		logger.Info(fmt.Sprintf("got signal %v, shutting down grpc server", sig))
+		s.GracefulStop()
+	}()
+
+	logger.Info(fmt.Sprintf("grpc server listening at %v", lis.Addr()))
 	err = s.Serve(lis)
 	if err != nil {
 		logger.Error(fmt.Sprintf("failed to serve: %v", err))
 		os.Exit(1)
 	}
+	logger.Info("grpc server has shut down")
 }

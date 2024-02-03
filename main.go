@@ -21,20 +21,20 @@ func main() {
 
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		grpcechoserver.Start(grpcechoserver.StartOption{
 			Bind:      *grpcBind,
 			LogFormat: *logFormat,
 		})
+		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		httpechoserver.Start(httpechoserver.StartOption{
 			Bind:      *httpBind,
 			LogFormat: *logFormat,
 		})
+		wg.Done()
 	}()
 
 	wg.Wait()
