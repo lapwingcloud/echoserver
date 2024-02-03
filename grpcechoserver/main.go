@@ -6,6 +6,7 @@ import (
 	"os"
 
 	pb "github.com/lapwingcloud/echoserver/proto"
+	"github.com/lapwingcloud/echoserver/util"
 	"google.golang.org/grpc"
 )
 
@@ -15,7 +16,7 @@ type StartOption struct {
 }
 
 func Start(option StartOption) {
-	logger := newLogger(option.LogFormat)
+	logger := util.NewLogger(option.LogFormat)
 
 	lis, err := net.Listen("tcp", option.Bind)
 	if err != nil {
@@ -24,7 +25,9 @@ func Start(option StartOption) {
 	}
 
 	ui := unaryInterceptor{
-		logger: logger,
+		logger:   logger,
+		hostname: util.Hostname(),
+		version:  util.Version(),
 	}
 	s := grpc.NewServer(grpc.UnaryInterceptor(ui.Intercept))
 	pb.RegisterEchoServer(s, &echoServer{})

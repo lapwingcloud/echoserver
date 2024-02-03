@@ -1,0 +1,38 @@
+name: Push Image to Docker Hub
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  push_img_docker_hub:
+    name: Push Image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Extract Tags and Labels
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: lapwingcloud/echoserver
+
+      - name: Write Version to File
+        run: |-
+          echo "${{ steps.meta.outputs.tags }}" > version.txt
+
+      - name: Build and Push Docker Image to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

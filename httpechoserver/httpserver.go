@@ -5,24 +5,23 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lapwingcloud/echoserver/util"
 )
 
 type httpServer struct {
-	logger     *slog.Logger
-	statusCode int
+	logger *slog.Logger
+
+	hostname string
+	version  string
 }
 
 func (s *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
-	s.statusCode = 0
-
-	hostname, _ := os.Hostname()
 	remoteIp, remotePortStr, _ := net.SplitHostPort(r.RemoteAddr)
 	remotePort, _ := strconv.Atoi(remotePortStr)
 	requestId := r.Header.Get("X-Request-Id")
@@ -33,7 +32,8 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	requestContext := &RequestContext{
 		StartTime:  startTime,
-		Hostname:   hostname,
+		Hostname:   s.hostname,
+		Version:    s.version,
 		RemoteIp:   remoteIp,
 		RemotePort: remotePort,
 		RequestId:  requestId,
@@ -42,10 +42,11 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := context.WithValue(r.Context(), requestContextKey, requestContext)
 	err := ping(w, r.WithContext(ctx))
 	if err != nil {
-		writeError(w, err)
+		util.WriteError(w, err)
 		s.logger.Error(
 			"http request error",
-			"hostname", hostname,
+			"hostname", s.hostname,
+			"version", s.version,
 			"remote_ip", remoteIp,
 			"remote_port", remotePort,
 			"request_id", requestId,
@@ -61,7 +62,8 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else {
 		s.logger.Info(
 			"http request ok",
-			"hostname", hostname,
+			"hostname", s.hostname,
+			"version", s.version,
 			"remote_ip", remoteIp,
 			"remote_port", remotePort,
 			"request_id", requestId,

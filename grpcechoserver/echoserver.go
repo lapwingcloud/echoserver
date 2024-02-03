@@ -6,6 +6,7 @@ import (
 	"time"
 
 	pb "github.com/lapwingcloud/echoserver/proto"
+	"github.com/lapwingcloud/echoserver/util"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -23,22 +24,23 @@ func (s *echoServer) Ping(ctx context.Context, req *pb.PingMessage) (*pb.PongMes
 	if !ok || md == nil {
 		return nil, status.Error(codes.Unknown, "failed to retrieve metadata from incoming context")
 	}
-	remotePort, _ := strconv.Atoi(firstValueFromMetadata(md, "remote-port"))
-	startTime, err := time.Parse(time.RFC3339, firstValueFromMetadata(md, "start-time"))
+	remotePort, _ := strconv.Atoi(util.FirstValueFromMetadata(md, "remote-port"))
+	startTime, err := time.Parse(time.RFC3339, util.FirstValueFromMetadata(md, "start-time"))
 	var requestTime float64
 	if err == nil {
 		requestTime = time.Since(startTime).Seconds()
 	}
 	return &pb.PongMessage{
 		Timestamp:     time.Now().Format(time.RFC3339),
-		Hostname:      firstValueFromMetadata(md, "hostname"),
-		RemoteIp:      firstValueFromMetadata(md, "remote-ip"),
+		Hostname:      util.FirstValueFromMetadata(md, "hostname"),
+		Version:       util.FirstValueFromMetadata(md, "version"),
+		RemoteIp:      util.FirstValueFromMetadata(md, "remote-ip"),
 		RemotePort:    int32(remotePort),
-		RequestId:     firstValueFromMetadata(md, "request-id"),
-		Authority:     firstValueFromMetadata(md, ":authority"),
-		RequestMethod: firstValueFromMetadata(md, "request-method"),
+		RequestId:     util.FirstValueFromMetadata(md, "request-id"),
+		Authority:     util.FirstValueFromMetadata(md, ":authority"),
+		RequestMethod: util.FirstValueFromMetadata(md, "request-method"),
 		RequestTime:   requestTime,
-		UserAgent:     firstValueFromMetadata(md, "user-agent"),
+		UserAgent:     util.FirstValueFromMetadata(md, "user-agent"),
 		Payload:       req.GetPayload(),
 	}, nil
 }

@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/lapwingcloud/echoserver/util"
 )
 
 type PingMessage struct {
@@ -17,6 +19,7 @@ type PingMessage struct {
 type PongMessage struct {
 	Timestamp     string  `json:"timestamp"`
 	Hostname      string  `json:"hostname"`
+	Version       string  `json:"version"`
 	RemoteIp      string  `json:"remote_ip"`
 	RemotePort    int     `json:"remote_port"`
 	RequestId     string  `json:"request_id"`
@@ -55,6 +58,7 @@ func ping(w http.ResponseWriter, r *http.Request) error {
 	pong := PongMessage{
 		Timestamp:     time.Now().Format(time.RFC3339),
 		Hostname:      requestContext.Hostname,
+		Version:       requestContext.Version,
 		RemoteIp:      requestContext.RemoteIp,
 		RemotePort:    requestContext.RemotePort,
 		RequestId:     requestContext.RequestId,
@@ -66,5 +70,5 @@ func ping(w http.ResponseWriter, r *http.Request) error {
 		UserAgent:     requestContext.UserAgent,
 		Payload:       ping.Payload,
 	}
-	return writeJSON(w, pong)
+	return util.WriteJSON(w, pong)
 }

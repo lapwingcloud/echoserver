@@ -12,16 +12,17 @@ message PingMessage {
 message PongMessage {
   string timestamp = 1;
   string hostname = 2;
-  string remoteIp = 3;
-  int32 remotePort = 4;
+  string version = 3;
+  string remoteIp = 4;
+  int32 remotePort = 5;
   // reserve a field for real client ip
-  // string clientIp = 5;
-  string requestId = 6;
-  string authority = 7;
-  string requestMethod = 8;
-  double requestTime = 9;
-  string userAgent = 10;
-  string payload = 11;
+  // string clientIp = 6;
+  string requestId = 7;
+  string authority = 8;
+  string requestMethod = 9;
+  double requestTime = 10;
+  string userAgent = 11;
+  string payload = 12;
 }
 
 service Echo {
