@@ -12,6 +12,7 @@ import (
 	pb "github.com/lapwingcloud/echoserver/proto"
 	"github.com/lapwingcloud/echoserver/util"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type StartOption struct {
@@ -44,6 +45,7 @@ func Start(option StartOption) {
 	}
 	s := grpc.NewServer(grpc.UnaryInterceptor(ui.Intercept))
 	pb.RegisterEchoServer(s, &echoServer{})
+	reflection.Register(s)
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
