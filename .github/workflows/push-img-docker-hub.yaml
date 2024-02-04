@@ -23,10 +23,13 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: lapwingcloud/echoserver
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
 
       - name: Write Version to File
-        run: |-
-          echo "${{ steps.meta.outputs.tags }}" > version.txt
+        run: |
+          echo "${{ github.ref_name }}" > version.txt
 
       - name: Build and Push Docker Image to Docker Hub
         uses: docker/build-push-action@v5
