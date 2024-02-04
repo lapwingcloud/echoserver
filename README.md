@@ -30,7 +30,7 @@ docker run -p 8080:8080 -p 9090:9090 lapwingcloud/echoserver
 
 For both grpc and http it supports 2 parameters in the request. Note for http it needs to be passed in the request body as json.
 
-- `delaySeconds`: if specified, the request will sleep the number of `delaySeconds` before returning the response 
+- `delaySeconds`: if specified, the request will sleep the number of `delaySeconds` before returning the response
 - `payload`: if specified, the server will add the same field with the same value in the response
 
 ### example http request
@@ -88,3 +88,49 @@ Usage of echoserver:
   -log-format string
         The log format (text, json) (default "json")
 ```
+
+## Example
+
+### Deploy to Kubernetes
+
+Here is an [example kubernetes manifest](example/deploy-k8s.yaml) that you can deploy to any cluster.
+
+**prerequisites**
+
+- the kubernetes cluster has an ingress controller  (e.g. [ingress-nginx](https://kubernetes.github.io/ingress-nginx/))
+- (optional) you already have a valid TLS certificate for the domain you want the echoserver to serve on
+
+**setup**
+
+First you need to replace the domain name in the [example kubernetes manifest](example/deploy-k8s.yaml) with your own domain.
+
+Then run the `kubectl` commands below to create a namespace and create the k8s deployment, service, ingress objects.
+
+```
+kubectl create echoserver
+kubectl -n echoserver apply -f example/deploy-k8s.yaml
+```
+
+Optionally, if you have a TLS certificate and the private key, create the TLS secret in kubernetes so the ingress controller can use it to serve https and grpc over TLS.
+
+Note you can obtain free TLS certificates via tools like [certbot](https://certbot.eff.org/) or [cert-manager](https://cert-manager.io/) using [letsencrypt](https://letsencrypt.org/).
+
+```
+kubectl -n echoserver create secret tls echoserver-tls --cert fullchain.pem --key privkey.pem
+```
+
+Now the echoserver should be accessible from the domain you setup, e.g.
+
+```
+curl https://echoserver-http.lapwingcloud.com
+grpcurl echoserver-grpc.lapwingcloud.com:443 echo.Echo/Ping
+```
+
+If you didn't setup the TLS, just add the insecure flags to ignore invalid certificate.
+
+```
+curl --insecure https://echoserver-http.lapwingcloud.com
+grpcurl -insecure echoserver-grpc.lapwingcloud.com:443 echo.Echo/Ping
+```
+
+Note, nginx doesn't support grpc over plaintext, so you cannot use `grpcurl -plaintext` to access the ingress domain.
