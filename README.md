@@ -58,8 +58,7 @@ $ curl -d '{"delaySeconds":0.1, "payload":"hello"}' localhost:8080
 ### example grpc request
 
 ```
-$ grpcurl -plaintext -d '{"delaySeconds":0.1, "payload":"hello"}' localhost:9090
-echo.Echo/Ping
+$ grpcurl -plaintext -d '{"delaySeconds":0.1, "payload":"hello"}' localhost:9090 echo.Echo/Ping
 {
   "timestamp": "2024-02-04T02:06:52.025236095Z",
   "hostname": "02f3d12d7951",
@@ -102,7 +101,7 @@ Here is an [example kubernetes manifest](example/deploy-k8s.yaml) that you can d
 
 **setup**
 
-First you need to replace the domain name in the [example kubernetes manifest](example/deploy-k8s.yaml) with your own domain.
+First you need to replace the domain name in the example/deploy-k8s.yaml with your own domain.
 
 Then run the `kubectl` commands below to create a namespace and create the k8s deployment, service, ingress objects.
 
