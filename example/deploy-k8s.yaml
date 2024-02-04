@@ -1,0 +1,91 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: echoserver-http
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: echoserver-http.lapwingcloud.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: echoserver
+                port:
+                  number: 8080
+  tls:
+  - secretName: echoserver-tls
+    hosts:
+      - echoserver-http.lapwingcloud.com
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: echoserver-grpc
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: echoserver-grpc.lapwingcloud.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: echoserver
+                port:
+                  number: 9090
+  tls:
+  - secretName: echoserver-tls
+    hosts:
+      - echoserver-grpc.lapwingcloud.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echoserver
+spec:
+  selector:
+    app: echoserver
+  ports:
+    - name: http
+      appProtocol: http
+      protocol: TCP
+      port: 8080
+      targetPort: http
+    - name: grpc
+      appProtocol: grpc
+      protocol: TCP
+      port: 9090
+      targetPort: grpc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoserver
+  labels:
+    app: echoserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echoserver
+  template:
+    metadata:
+      labels:
+        app: echoserver
+    spec:
+      containers:
+        - name: echoserver
+          image: lapwingcloud/echoserver:0.2
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: grpc
+              containerPort: 9090
