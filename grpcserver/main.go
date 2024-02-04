@@ -1,4 +1,4 @@
-package grpcechoserver
+package grpcserver
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package httpechoserver
+package httpserver
 
 import (
 	"encoding/json"
