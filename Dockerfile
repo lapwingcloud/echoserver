@@ -8,4 +8,4 @@ FROM debian:12
 
 COPY --from=builder /code/echoserver /bin/echoserver
 COPY version.txt version.txt
-CMD echoserver
+CMD ["echoserver"]
