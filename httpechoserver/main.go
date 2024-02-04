@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -19,14 +21,23 @@ type StartOption struct {
 }
 
 func Start(option StartOption) {
-	logger := util.NewLogger(option.LogFormat)
+	version := util.Version()
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Fatalf("failed to retrieve hostname: %v", err)
+	}
+	logger := util.NewLogger(
+		option.LogFormat,
+		slog.String("version", version),
+		slog.String("hostname", hostname),
+	)
 
 	s := http.Server{
 		Addr: option.Bind,
 		Handler: &httpServer{
 			logger:   logger,
-			hostname: util.Hostname(),
-			version:  util.Version(),
+			version:  version,
+			hostname: hostname,
 		},
 	}
 
@@ -45,7 +56,7 @@ func Start(option StartOption) {
 	}()
 
 	logger.Info(fmt.Sprintf("http server listening at %v", s.Addr))
-	err := s.ListenAndServe()
+	err = s.ListenAndServe()
 	if errors.Is(err, http.ErrServerClosed) {
 		wg.Wait()
 		logger.Info("http server has shut down")

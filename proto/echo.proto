@@ -5,7 +5,7 @@ package echo;
 option go_package = "github.com/lapwingcloud/echoserver/proto";
 
 message PingMessage {
-  int64 delayNanos = 1;
+  double delaySeconds = 1;
   string payload = 2;
 }
 
@@ -23,7 +23,7 @@ message PongMessage {
   double requestTime = 10;
   string userAgent = 11;
 
-  int64 delayNanos = 21;
+  double delaySeconds = 21;
   string payload = 22;
 }
 

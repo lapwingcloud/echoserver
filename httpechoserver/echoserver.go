@@ -12,14 +12,14 @@ import (
 )
 
 type PingMessage struct {
-	DelayNanos int64  `json:"delayNanos,omitempty"`
-	Payload    string `json:"payload,omitempty"`
+	DelaySeconds float64 `json:"delaySeconds,omitempty"`
+	Payload      string  `json:"payload,omitempty"`
 }
 
 type PongMessage struct {
 	Timestamp     string  `json:"timestamp"`
-	Hostname      string  `json:"hostname"`
 	Version       string  `json:"version"`
+	Hostname      string  `json:"hostname"`
 	RemoteIp      string  `json:"remoteIp"`
 	RemotePort    int     `json:"remotePort"`
 	RequestId     string  `json:"requestId"`
@@ -51,14 +51,14 @@ func ping(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	if ping.DelayNanos > 0 {
-		time.Sleep(time.Duration(ping.DelayNanos) * time.Nanosecond)
+	if ping.DelaySeconds > 0 {
+		time.Sleep(time.Duration(ping.DelaySeconds*1000000000) * time.Nanosecond)
 	}
 
 	pong := PongMessage{
-		Timestamp:     time.Now().Format(time.RFC3339),
-		Hostname:      requestContext.Hostname,
+		Timestamp:     time.Now().Format(time.RFC3339Nano),
 		Version:       requestContext.Version,
+		Hostname:      requestContext.Hostname,
 		RemoteIp:      requestContext.RemoteIp,
 		RemotePort:    requestContext.RemotePort,
 		RequestId:     requestContext.RequestId,
@@ -69,8 +69,8 @@ func ping(w http.ResponseWriter, r *http.Request) error {
 		RequestTime:   time.Since(requestContext.StartTime).Seconds(),
 		UserAgent:     requestContext.UserAgent,
 		PingMessage: PingMessage{
-			Payload:    ping.Payload,
-			DelayNanos: ping.DelayNanos,
+			Payload:      ping.Payload,
+			DelaySeconds: ping.DelaySeconds,
 		},
 	}
 	return util.WriteJSON(w, pong)

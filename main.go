@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	grpcBind  = flag.String("grpc-bind", "127.0.0.1:9090", "The grpc server listen address")
-	httpBind  = flag.String("http-bind", "127.0.0.1:8080", "The http server listen address")
+	grpcBind  = flag.String("grpc-bind", ":9090", "The grpc server listen address")
+	httpBind  = flag.String("http-bind", ":8080", "The http server listen address")
 	logFormat = flag.String("log-format", "json", "The log format (text, json)")
 )
 

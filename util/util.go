@@ -29,12 +29,12 @@ func Hostname() string {
 	return hostname
 }
 
-func NewLogger(logformat string) *slog.Logger {
-	switch logformat {
+func NewLogger(logFormat string, commonArgs ...any) *slog.Logger {
+	switch logFormat {
 	case "json":
-		return slog.New(slog.NewJSONHandler(os.Stderr, nil))
+		return slog.New(slog.NewJSONHandler(os.Stderr, nil)).With(commonArgs...)
 	default:
-		return slog.Default()
+		return slog.Default().With(commonArgs...)
 	}
 }
 
@@ -69,7 +69,7 @@ func WriteError(w http.ResponseWriter, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
 	_, _ = w.Write([]byte(fmt.Sprintf(
 		`{"timestamp":"%s","error":"%v"}`,
-		time.Now().Format(time.RFC3339),
+		time.Now().Format(time.RFC3339Nano),
 		err,
 	)))
 }

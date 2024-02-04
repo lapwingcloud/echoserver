@@ -2,6 +2,8 @@ package grpcechoserver
 
 import (
 	"fmt"
+	"log"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
@@ -18,7 +20,16 @@ type StartOption struct {
 }
 
 func Start(option StartOption) {
-	logger := util.NewLogger(option.LogFormat)
+	version := util.Version()
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Fatalf("failed to retrieve hostname: %v", err)
+	}
+	logger := util.NewLogger(
+		option.LogFormat,
+		slog.String("version", version),
+		slog.String("hostname", hostname),
+	)
 
 	lis, err := net.Listen("tcp", option.Bind)
 	if err != nil {
@@ -28,8 +39,8 @@ func Start(option StartOption) {
 
 	ui := unaryInterceptor{
 		logger:   logger,
-		hostname: util.Hostname(),
 		version:  util.Version(),
+		hostname: util.Hostname(),
 	}
 	s := grpc.NewServer(grpc.UnaryInterceptor(ui.Intercept))
 	pb.RegisterEchoServer(s, &echoServer{})

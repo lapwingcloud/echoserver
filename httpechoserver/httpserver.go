@@ -15,8 +15,8 @@ import (
 type httpServer struct {
 	logger *slog.Logger
 
-	hostname string
 	version  string
+	hostname string
 }
 
 func (s *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -32,8 +32,8 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	requestContext := &RequestContext{
 		StartTime:  startTime,
-		Hostname:   s.hostname,
 		Version:    s.version,
+		Hostname:   s.hostname,
 		RemoteIp:   remoteIp,
 		RemotePort: remotePort,
 		RequestId:  requestId,
@@ -41,39 +41,29 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx := context.WithValue(r.Context(), requestContextKey, requestContext)
 	err := ping(w, r.WithContext(ctx))
+	statusCode := http.StatusOK
 	if err != nil {
-		util.WriteError(w, err)
+		statusCode = http.StatusInternalServerError
+	}
+	s.logger.Info(
+		"http request finished",
+		slog.String("remoteIp", remoteIp),
+		slog.Int("remotePort", remotePort),
+		slog.String("requestId", requestId),
+		slog.String("requestMethod", r.Method),
+		slog.String("requestHost", r.Host),
+		slog.String("requestPath", r.URL.Path),
+		slog.String("requestQuery", r.URL.RawQuery),
+		slog.Float64("requestTime", time.Since(startTime).Seconds()),
+		slog.String("userAgent", userAgent),
+		slog.Int("status", statusCode),
+	)
+	if err != nil {
 		s.logger.Error(
 			"http request error",
-			"hostname", s.hostname,
-			"version", s.version,
-			"remoteIp", remoteIp,
-			"remotePort", remotePort,
-			"requestId", requestId,
-			"requestMethod", r.Method,
-			"requestHost", r.Host,
-			"requestPath", r.URL.Path,
-			"requestQuery", r.URL.RawQuery,
-			"requestTime", time.Since(startTime).Seconds(),
-			"userAgent", userAgent,
-			"status", http.StatusInternalServerError,
-			"error", err,
+			slog.String("requestId", requestId),
+			slog.String("error", err.Error()),
 		)
-	} else {
-		s.logger.Info(
-			"http request ok",
-			"hostname", s.hostname,
-			"version", s.version,
-			"remoteIp", remoteIp,
-			"remotePort", remotePort,
-			"requestId", requestId,
-			"requestMethod", r.Method,
-			"requestHost", r.Host,
-			"requestPath", r.URL.Path,
-			"requestQuery", r.URL.RawQuery,
-			"requestTime", time.Since(startTime).Seconds(),
-			"userAgent", userAgent,
-			"status", http.StatusOK,
-		)
+		util.WriteError(w, err)
 	}
 }

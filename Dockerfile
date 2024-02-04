@@ -2,10 +2,10 @@ FROM golang:1.21 AS builder
 
 COPY . /code
 WORKDIR /code
-RUN CGO_ENABLED=0 GOOS=linux go build -o echoserver main.go
+RUN go build -o echoserver main.go
 
-FROM digitalocean/doks-debug
+FROM debian:12
 
-COPY --from=builder /code/echoserver echoserver
+COPY --from=builder /code/echoserver /bin/echoserver
 COPY version.txt version.txt
-CMD ./echoserver
+CMD echoserver
