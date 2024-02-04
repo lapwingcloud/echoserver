@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/lapwingcloud/echoserver/util"
 )
 
 type httpServer struct {
@@ -64,6 +63,6 @@ func (s *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			slog.String("requestId", requestId),
 			slog.String("error", err.Error()),
 		)
-		util.WriteError(w, err)
+		writeError(w, err)
 	}
 }

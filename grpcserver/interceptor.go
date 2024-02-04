@@ -1,4 +1,4 @@
-package grpcechoserver
+package grpcserver
 
 import (
 	"context"
@@ -30,12 +30,12 @@ func (u *unaryInterceptor) Intercept(ctx context.Context, req interface{}, info 
 	}
 	p, _ := peer.FromContext(ctx)
 	remoteIp, remotePort := util.ParseNetAddr(p.Addr)
-	requestId := util.FirstValueFromMetadata(md, "request-id")
+	requestId := firstValueFromMetadata(md, "request-id")
 	if requestId == "" {
 		requestId = uuid.New().String()
 	}
-	authority := util.FirstValueFromMetadata(md, ":authority")
-	userAgent := util.FirstValueFromMetadata(md, "user-agent")
+	authority := firstValueFromMetadata(md, ":authority")
+	userAgent := firstValueFromMetadata(md, "user-agent")
 
 	md.Append("start-time", startTime.Format(time.RFC3339Nano))
 	md.Append("version", u.version)

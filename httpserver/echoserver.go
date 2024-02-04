@@ -7,8 +7,6 @@ import (
 	"io"
 	"net/http"
 	"time"
-
-	"github.com/lapwingcloud/echoserver/util"
 )
 
 type PingMessage struct {
@@ -73,5 +71,5 @@ func ping(w http.ResponseWriter, r *http.Request) error {
 			DelaySeconds: ping.DelaySeconds,
 		},
 	}
-	return util.WriteJSON(w, pong)
+	return writeJSON(w, pong)
 }

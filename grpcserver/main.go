@@ -39,8 +39,8 @@ func Start(option StartOption) {
 
 	ui := unaryInterceptor{
 		logger:   logger,
-		version:  util.Version(),
-		hostname: util.Hostname(),
+		version:  version,
+		hostname: hostname,
 	}
 	s := grpc.NewServer(grpc.UnaryInterceptor(ui.Intercept))
 	pb.RegisterEchoServer(s, &echoServer{})

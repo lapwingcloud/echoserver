@@ -4,8 +4,8 @@ import (
 	"flag"
 	"sync"
 
-	"github.com/lapwingcloud/echoserver/grpcechoserver"
-	"github.com/lapwingcloud/echoserver/httpechoserver"
+	"github.com/lapwingcloud/echoserver/grpcserver"
+	"github.com/lapwingcloud/echoserver/httpserver"
 )
 
 var (
@@ -21,7 +21,7 @@ func main() {
 
 	wg.Add(1)
 	go func() {
-		grpcechoserver.Start(grpcechoserver.StartOption{
+		grpcserver.Start(grpcserver.StartOption{
 			Bind:      *grpcBind,
 			LogFormat: *logFormat,
 		})
@@ -30,7 +30,7 @@ func main() {
 
 	wg.Add(1)
 	go func() {
-		httpechoserver.Start(httpechoserver.StartOption{
+		httpserver.Start(httpserver.StartOption{
 			Bind:      *httpBind,
 			LogFormat: *logFormat,
 		})
