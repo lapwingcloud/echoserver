@@ -1,4 +1,4 @@
-# echoserver ![Docker Image Version](https://img.shields.io/docker/v/lapwingcloud/echoserver/latest?logo=docker&color=blue&link=https%3A%2F%2Fhub.docker.com%2Fr%2Flapwingcloud%2Fechoserver) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/lapwingcloud/echoserver/push-img-docker-hub.yaml?logo=github)
+# echoserver [![docker image version](https://img.shields.io/docker/v/lapwingcloud/echoserver/latest?logo=docker&color=blue)](https://hub.docker.com/r/lapwingcloud/Fechoserver) [![github build status](https://img.shields.io/github/actions/workflow/status/lapwingcloud/echoserver/push-img-docker-hub.yaml?logo=github)](https://github.com/lapwingcloud/echoserver/actions)
 
 
 A grpc and http echo server returning connection and server information for debugging purpose. :ping_pong:
