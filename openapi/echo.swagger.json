@@ -1,0 +1,139 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "echo.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Echo"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/echo.Echo/Ping": {
+      "post": {
+        "operationId": "Echo_Ping",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/echoPongMessage"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/echoPingMessage"
+            }
+          }
+        ],
+        "tags": [
+          "Echo"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "echoPingMessage": {
+      "type": "object",
+      "properties": {
+        "delaySeconds": {
+          "type": "number",
+          "format": "double"
+        },
+        "payload": {
+          "type": "string"
+        }
+      }
+    },
+    "echoPongMessage": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string"
+        },
+        "hostname": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "remoteIp": {
+          "type": "string"
+        },
+        "remotePort": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "requestId": {
+          "type": "string",
+          "title": "reserve a field for real client ip\r\nstring clientIp = 6;"
+        },
+        "authority": {
+          "type": "string"
+        },
+        "requestMethod": {
+          "type": "string"
+        },
+        "requestTime": {
+          "type": "number",
+          "format": "double"
+        },
+        "userAgent": {
+          "type": "string"
+        },
+        "delaySeconds": {
+          "type": "number",
+          "format": "double"
+        },
+        "payload": {
+          "type": "string"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}
