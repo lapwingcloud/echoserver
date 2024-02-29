@@ -7,7 +7,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: echoserver-http.lapwingcloud.com
+    - host: echoserver-http.lapwing.cloud
       http:
         paths:
           - path: /
@@ -20,7 +20,7 @@ spec:
   tls:
   - secretName: echoserver-tls
     hosts:
-      - echoserver-http.lapwingcloud.com
+      - echoserver-http.lapwing.cloud
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -31,7 +31,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: echoserver-grpc.lapwingcloud.com
+    - host: echoserver-grpc.lapwing.cloud
       http:
         paths:
           - path: /
@@ -44,7 +44,7 @@ spec:
   tls:
   - secretName: echoserver-tls
     hosts:
-      - echoserver-grpc.lapwingcloud.com
+      - echoserver-grpc.lapwing.cloud
 ---
 apiVersion: v1
 kind: Service
@@ -72,7 +72,7 @@ metadata:
   labels:
     app: echoserver
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: echoserver
@@ -83,9 +83,73 @@ spec:
     spec:
       containers:
         - name: echoserver
-          image: lapwingcloud/echoserver:0.2
+          image: lapwingcloud/echoserver:dev
           ports:
             - name: http
               containerPort: 8080
             - name: grpc
               containerPort: 9090
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: echoserver-gateway
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: echoserver-gateway.lapwing.cloud
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 8081
+  tls:
+  - secretName: echoserver-tls
+    hosts:
+      - echoserver-gateway.lapwing.cloud
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+spec:
+  selector:
+    app: gateway
+  ports:
+    - name: http
+      appProtocol: http
+      protocol: TCP
+      port: 8081
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  labels:
+    app: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+        - name: gateway
+          image: lapwingcloud/echoserver:dev
+          args:
+            - gateway
+            - -grpc-server=echoserver.echoserver.svc.cluster.local:9090
+          ports:
+            - name: http
+              containerPort: 8081
